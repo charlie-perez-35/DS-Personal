@@ -29,7 +29,10 @@ WHERE discontinued <> 0;
 -- ------------------------------------------------------------------
 -- 4). Name & List Price of Most & Least Expensive Products
 -- ------------------------------------------------------------------
-
+SELECT product_name
+	, list_price
+FROM northwind.products
+WHERE list_price = 
 
 -- ------------------------------------------------------------------
 -- 5). Product ID, Name & List Price Costing Less Than $20
