@@ -1,8 +1,11 @@
-#2a code
+# 2a code
+
+# see end of lab code for explanation of usage of 'order_details_key'
 
 USE Northwind_DW3;
 CREATE TABLE `fact_orders` (
-  `order_key` int NOT NULL AUTO_INCREMENT,
+  `order_details_key` int NOT NULL AUTO_INCREMENT,
+  `order_key` int DEFAULT NULL,
   `employee_key` int DEFAULT NULL,
   `customer_key` int DEFAULT NULL,
   `order_date` datetime DEFAULT NULL,
@@ -25,12 +28,11 @@ CREATE TABLE `fact_orders` (
   `unit_price` decimal(19,4) DEFAULT '0.0000',
   `discount` double NOT NULL DEFAULT '0',
   `order_details_status` varchar(50) DEFAULT NULL,
-  PRIMARY KEY (`order_key`)
-) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb3;
+  PRIMARY KEY (`order_details_key`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
+
 
 # 2b code
-
-
 
 # TODO: Write a SELECT Statement to Populate the table;
 SELECT `products`.`id`,
@@ -82,7 +84,9 @@ SELECT * FROM northwind_dw3.dim_shippers;
 -- Populate fact_orders
 -- ----------------------------------------------
 INSERT INTO `northwind_dw3`.`fact_orders`
-(`employee_key`,
+(`order_details_key`,
+`order_key`,
+`employee_key`,
 `customer_key`,
 `product_key`,
 `shipper_key`,
@@ -116,8 +120,9 @@ TODO: Write a SELECT Statement that:
 - columns you're required to extract from each of the four tables. Pay close attention!
 --------------------------------------------------------------------------------------------------
 */
-SELECT
-    o.employee_id,
+SELECT od.id,
+	o.id,
+	o.employee_id,
     o.customer_id,
     od.product_id,
     o.shipper_id,
@@ -147,9 +152,13 @@ ON o.id = od.order_id
 INNER JOIN northwind.order_details_status AS ods
 ON od.status_id = ods.id;
 
+# could not figure out how to keep all the order details data without making the order_details key the primary key instead of the order key.
+# Essentially, because the primary key can't repeat itself it couldn't read in the order_details because they have repeated order id numbers
+# It inserts all the appropriate data, just with significant redundancy, so I wanted to explain myself a bit
+# Looked it up online and it suggested the 'STUFF' function but I didn't think I needed to overcomplicate it that much
+# another way I would consider doing it would be by using the 'STUFF' function to return both appropriate order_details ids
+# and then use that as a path for lookups for order details
 -- ----------------------------------------------
 -- Validate that the Data was Inserted ----------
 -- ----------------------------------------------
 SELECT * FROM northwind_dw3.fact_orders;
-
-SELECT * FROM northwind.orders;
