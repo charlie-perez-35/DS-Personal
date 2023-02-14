@@ -1,0 +1,155 @@
+#2a code
+
+USE Northwind_DW3;
+CREATE TABLE `fact_orders` (
+  `order_key` int NOT NULL AUTO_INCREMENT,
+  `employee_key` int DEFAULT NULL,
+  `customer_key` int DEFAULT NULL,
+  `order_date` datetime DEFAULT NULL,
+  `shipped_date` datetime DEFAULT NULL,
+  `shipper_key` int DEFAULT NULL,
+  `ship_name` varchar(50) DEFAULT NULL,
+  `ship_address` longtext,
+  `ship_city` varchar(50) DEFAULT NULL,
+  `ship_state_province` varchar(50) DEFAULT NULL,
+  `ship_zip_postal_code` varchar(50) DEFAULT NULL,
+  `ship_country_region` varchar(50) DEFAULT NULL,
+  `shipping_fee` decimal(19,4) DEFAULT '0.0000',
+  `taxes` decimal(19,4) DEFAULT '0.0000',
+  `payment_type` varchar(50) DEFAULT NULL,
+  `paid_date` datetime DEFAULT NULL,
+  `tax_rate` double DEFAULT '0',
+  `order_status` varchar(50) DEFAULT '0',
+  `product_key` int DEFAULT NULL,
+  `quantity` decimal(18,4) NOT NULL DEFAULT '0.0000',
+  `unit_price` decimal(19,4) DEFAULT '0.0000',
+  `discount` double NOT NULL DEFAULT '0',
+  `order_details_status` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`order_key`)
+) ENGINE=InnoDB AUTO_INCREMENT=82 DEFAULT CHARSET=utf8mb3;
+
+# 2b code
+
+
+
+# TODO: Write a SELECT Statement to Populate the table;
+SELECT `products`.`id`,
+	`products`.`product_code`,
+	`products`.`product_name`,
+	`products`.`standard_cost`,
+	`products`.`list_price`,
+	`products`.`reorder_level`,
+	`products`.`target_level`,
+	`products`.`quantity_per_unit`,
+	`products`.`discontinued`,
+	`products`.`minimum_reorder_quantity`,
+	`products`.`category`
+FROM northwind.products;
+-- ----------------------------------------------
+-- Validate that the Data was Inserted ----------
+-- ----------------------------------------------
+SELECT * FROM northwind_dw3.dim_products;
+
+
+-- ----------------------------------------------
+-- Populate dim_shippers
+-- ----------------------------------------------
+INSERT INTO `northwind_dw3`.`dim_shippers`
+(`shipper_key`,
+`company`,
+`address`,
+`city`,
+`state_province`,
+`zip_postal_code`,
+`country_region`)
+# TODO: Write a SELECT Statement to Populate the table;
+SELECT `shippers`.`id`,
+	`shippers`.`company`,
+    `shippers`.`address`,
+    `shippers`.`city`,
+    `shippers`.`state_province`,
+    `shippers`.`zip_postal_code`,
+    `shippers`.`country_region`
+FROM northwind.shippers;
+-- ----------------------------------------------
+-- Validate that the Data was Inserted ----------
+-- ----------------------------------------------
+SELECT * FROM northwind_dw3.dim_shippers;
+
+
+
+-- ----------------------------------------------
+-- Populate fact_orders
+-- ----------------------------------------------
+INSERT INTO `northwind_dw3`.`fact_orders`
+(`employee_key`,
+`customer_key`,
+`product_key`,
+`shipper_key`,
+`ship_name`,
+`ship_address`,
+`ship_city`,
+`ship_state_province`,
+`ship_zip_postal_code`,
+`ship_country_region`,
+`quantity`,
+`order_date`,
+`shipped_date`,
+`unit_price`,
+`discount`,
+`shipping_fee`,
+`taxes`,
+`payment_type`,
+`paid_date`,
+`tax_rate`,
+`order_status`,
+`order_details_status`)
+/* 
+--------------------------------------------------------------------------------------------------
+TODO: Write a SELECT Statement that:
+- JOINS the northwind.orders table with the northwind.orders_status table
+- JOINS the northwind.orders with the northwind.order_details table.
+--  (TIP: Remember that there is a one-to-many relationship between orders and order_details).
+- JOINS the northwind.order_details table with the northwind.order_details_status table.
+--------------------------------------------------------------------------------------------------
+- The column list I've included in the INSERT INTO clause above should be your guide to which 
+- columns you're required to extract from each of the four tables. Pay close attention!
+--------------------------------------------------------------------------------------------------
+*/
+SELECT
+    o.employee_id,
+    o.customer_id,
+    od.product_id,
+    o.shipper_id,
+    o.ship_name,
+    o.ship_address,
+    o.ship_city,
+    o.ship_state_province,
+    o.ship_zip_postal_code,
+    o.ship_country_region,
+    od.quantity,
+    o.order_date,
+    o.shipped_date,
+    od.unit_price,
+    od.discount,
+    o.shipping_fee,
+    o.taxes,
+    o.payment_type,
+    o.paid_date,
+    o.tax_rate,
+    os.status_name AS order_status,
+    ods.status_name AS order_details_status
+FROM northwind.orders AS o
+INNER JOIN northwind.orders_status AS os
+ON o.status_id = os.id
+RIGHT OUTER JOIN northwind.order_details AS od
+ON o.id = od.order_id
+INNER JOIN northwind.order_details_status AS ods
+ON od.status_id = ods.id;
+
+-- ----------------------------------------------
+-- Validate that the Data was Inserted ----------
+-- ----------------------------------------------
+SELECT * FROM northwind_dw3.fact_orders;
+
+SELECT * FROM northwind.orders;
